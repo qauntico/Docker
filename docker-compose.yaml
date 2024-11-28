@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  mongodb:
+    image: "mongo"
+    volumes:
+      - data:/data/db #this is a name volume binding the internal data store folder to data, such that when the container is stoped and deleted and started back with that same name volume(data) the data will be persisted
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: fabs
+      MONGO_INITDB_ROOT_PASSWORD: example
+  backend: 
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '80:80'
+    volumes:
+      - logs:/app/logs #name volume
+      - ./backend:/app #bind mount
+      - /app/node_modules #anonynomous volumes
+    env_file:
+      - ./env/.env
+    # environment:
+    #   - USERNAME=fabs
+    #   - PASSWORD=example
+    depends_on:
+      - mongodb
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend/src:/app/src
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+volumes:
+  data: #you have to specify any name volume you are using in your services for example data being used in the mongodb services.
+  logs:
+    
+
